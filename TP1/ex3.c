@@ -16,6 +16,7 @@ void affiche(unsigned char tab[], int size){
 int fouiller(unsigned char tab[], int depart, int fin){
     int i = depart;
     while( i < fin){
+        putc('.', stdout); fflush(stdout); sleep(1); //Affiche un point toutes les secondes
         if (tab[i] == 0){
             //printf("Child process: %d has found %d at %d\n", getpid(), tab[i], i);
             return 1;

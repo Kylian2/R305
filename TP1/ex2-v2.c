@@ -1,6 +1,4 @@
-//Version différente, celle-ci contient une question à posé au prof
-//Est-ce que les enfants sont vraiment lancé en parallèle dans ex2, parceque avec ce code ou je break
-//la boucle while, tous les fils ne sont pas créés.
+//Ce programme est le même que le 2, à la différence qu'il ecris sur la sortie externe un . tout les seconde pendant le parcours
 
 #include <stdio.h>
 #include <time.h>
@@ -20,9 +18,9 @@ void affiche(unsigned char tab[], int size){
 int fouiller(unsigned char tab[], int depart, int fin){
     int i = depart;
     while( i < fin){
-        putc('.', stdout); fflush(stdout);
+        putc('.', stdout); fflush(stdout); sleep(1); //Affiche un point toutes les secondes
         if (tab[i] == 0){
-            printf("Child process: %d has found %d at %d\n", getpid(), tab[i], i);
+            //printf("Child process: %d has found %d at %d\n", getpid(), tab[i], i);
             return 1;
         }
         i++;
@@ -76,24 +74,27 @@ int main(int argc, char *argv[]){
         }
         if(child > 0){ 
             //Exécuté par le père
-            wait(&status);
-            printf("i = %d \n", i);
-            rep_fils[i] = WEXITSTATUS(status);
-            if(rep_fils[i]){
-                break;
-            }
+            
+            
         }else{
             //Exécuté par le fils
-            printf("Child process: %d \n", getpid());
+            //printf("Child process: %d \n", getpid());
             exit(fouiller(arr, (TABSIZE/N)*i, (TABSIZE/N)*i+TABSIZE/N));
         }
         i += 1;
     }
+
+    //Le père attends tout les enfants
+    for (i = 0; i < N; i++){
+        wait(&status); 
+        rep_fils[i] = WEXITSTATUS(status);
+    }
+
     i = 0;
     bool found = false;
     while (!found){
         if (rep_fils[i]){
-            printf("Needle found ! \n");
+            printf("Needle found by %d ! \n", i);
             found = true;
         }
         i += 1;
@@ -112,8 +113,6 @@ int main(int argc, char *argv[]){
     //0 -> premier indice (cherché par le père)
     //999 -> dernier indice (cherché par le fils)
     //500 -> TABSIZE/2 (moment de la séparation entre le père et le fils)
-    
-    //fputc, putc, putc_unlocked, putchar, putchar_unlocked, putw – output a character or word to a stream
-    //fflush, fpurge – flush a stream
+
     return 0;
 }
