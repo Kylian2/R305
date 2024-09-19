@@ -4,7 +4,9 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <stdbool.h>
+#include<signal.h>
 
+volatile pid_t parentPID;
 void affiche(unsigned char tab[], int size){
     printf("Affichage du tableau : ");
     for (int i = 0; i < size; i++){
@@ -16,9 +18,9 @@ void affiche(unsigned char tab[], int size){
 int fouiller(unsigned char tab[], int depart, int fin){
     int i = depart;
     while( i < fin){
-        putc('.', stdout); fflush(stdout); sleep(1); //Affiche un point toutes les secondes
+        //putc('.', stdout); fflush(stdout); //Affiche un point (fflush permet de recharger la sortie), 
+                                         //nous verrons s'afficher un point à chaque parcours de la boucle
         if (tab[i] == 0){
-            //printf("Child process: %d has found %d at %d\n", getpid(), tab[i], i);
             return 1;
         }
         i++;
@@ -26,10 +28,20 @@ int fouiller(unsigned char tab[], int depart, int fin){
     return 0;
 }
 
+void handleSIGTERM(){
+    if(getppid() == parentPID){
+        printf("PID %d s'est arrêté sous ordre du père \n", getpid());
+        exit(0);
+    }
+}
+
 int main(int argc, char *argv[]){
 
+    signal(SIGTERM, handleSIGTERM);
+    parentPID = getpid();
+
     //Initialisation du tableau
-    const int TABSIZE = 1000;
+    const int TABSIZE = 10000;
     unsigned char arr[TABSIZE]; //Entier de 0 à 255
     srandom(time(NULL));
 
@@ -62,6 +74,8 @@ int main(int argc, char *argv[]){
     int rep_fils[N];
     int status;
 
+    printf("Parent : %d \n", getpid());
+
     pid_t child = getpid();
     int i = 0;
     while (i < N && child > 0){
@@ -70,13 +84,9 @@ int main(int argc, char *argv[]){
             perror("fork() error");
             exit(1);
         }
-        if(child > 0){ 
-            //Exécuté par le père
-            
-            
-        }else{
+        if(child == 0){
             //Exécuté par le fils
-            //printf("Child process: %d \n", getpid());
+            printf("Child : %d \n", getpid());
             exit(fouiller(arr, (TABSIZE/N)*i, (TABSIZE/N)*i+TABSIZE/N));
         }
         i += 1;
@@ -86,13 +96,16 @@ int main(int argc, char *argv[]){
     for (i = 0; i < N; i++){
         wait(&status); 
         rep_fils[i] = WEXITSTATUS(status);
+        if (rep_fils[i] == 1){
+            kill(0, SIGTERM);
+        }
     }
 
     i = 0;
     bool found = false;
     while (!found){
         if (rep_fils[i]){
-            printf("Needle found by %d ! \n", i);
+            printf("Needle found ! \n");
             found = true;
         }
         i += 1;
@@ -100,17 +113,8 @@ int main(int argc, char *argv[]){
     if(!found){
         printf("No needle found ! \n");
     }
-    
-    
-    //Q1 : srandom(time(NULL)) initalise une seed pour la fonction random() à partir de la date actuelle
-    //Q2 : Il ne peut pas y avoir de 0 à la fin de l'entassement du foin car on ajoute toujours 1 en plus au nombre généré
-    //Q3 : Pour passer une information du fils au père, on peut se servir du status renvoyé par le fils lors de sa mort,
-    //     le père pourra le récupérer avec WEXITSTATUS
-
-    //Le programme peut etre tester avec : 
-    //0 -> premier indice (cherché par le père)
-    //999 -> dernier indice (cherché par le fils)
-    //500 -> TABSIZE/2 (moment de la séparation entre le père et le fils)
 
     return 0;
 }
+
+//L'appel de kill(0, SIGTERM) tue tout les processus du groupe de l'appellant, y compris l'appellant lui-même, le programme est donc stoppé. 
