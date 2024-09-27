@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <stdbool.h>
+#define TABSIZE 1000
 
 void affiche(unsigned char tab[], int size){
     printf("Affichage du tableau : ");
@@ -28,7 +29,6 @@ int fouiller(unsigned char tab[], int depart, int fin){
 int main(int argc, char *argv[]){
 
     //Initialisation du tableau
-    const int TABSIZE = 1000;
     unsigned char arr[TABSIZE]; //Entier de 0 à 255
     srandom(time(NULL));
 
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]){
         arr[index] = 0;
     }
 
-    //affiche(arr, TABSIZE);
+   // affiche(arr, TABSIZE);
 
     int rep_fils[N];
     int status;
@@ -69,11 +69,7 @@ int main(int argc, char *argv[]){
             perror("fork() error");
             exit(1);
         }
-        if(child > 0){ 
-            //Exécuté par le père
-            
-            
-        }else{
+        if(child == 0){
             //Exécuté par le fils
             //printf("Child process: %d \n", getpid());
             exit(fouiller(arr, (TABSIZE/N)*i, (TABSIZE/N)*i+TABSIZE/N));
@@ -85,13 +81,14 @@ int main(int argc, char *argv[]){
     for (i = 0; i < N; i++){
         wait(&status); 
         rep_fils[i] = WEXITSTATUS(status);
+        printf(" %d \n", rep_fils[i]);
     }
 
     i = 0;
     bool found = false;
-    while (!found){
+    while (!found && i<N){
         if (rep_fils[i]){
-            printf("Needle found by %d ! \n", i);
+            printf("Needle found \n");
             found = true;
         }
         i += 1;

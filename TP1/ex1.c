@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
-
+#define TABSIZE 1000
 
 void affiche(unsigned char tab[], int size){
     printf("Affichage du tableau : ");
@@ -27,7 +27,6 @@ int fouiller(unsigned char tab[], int depart, int fin){
 int main(){
 
     //Initialisation du tableau
-    const int TABSIZE = 1000;
     unsigned char arr[TABSIZE]; //Entier de 0 à 255
     srandom(time(NULL));
     // entasser du foin
@@ -71,7 +70,13 @@ int main(){
         exit(fouiller(arr, TABSIZE/2, TABSIZE));
     }
 
-    rep_fils = WEXITSTATUS(status);
+    if(!WIFEXITED(status)){
+        fprintf(stderr, "Terminaison anormale du processus fils");
+        exit(1);
+    }else{
+        rep_fils = WEXITSTATUS(status);
+    }
+
     if (rep_pere || rep_fils){
         printf("Needle found ! \n");
     }else {

@@ -4,7 +4,8 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <stdbool.h>
-#include<signal.h>
+#include <signal.h>
+#define TABSIZE 1000
 
 volatile pid_t parentPID;
 void affiche(unsigned char tab[], int size){
@@ -18,7 +19,7 @@ void affiche(unsigned char tab[], int size){
 int fouiller(unsigned char tab[], int depart, int fin){
     int i = depart;
     while( i < fin){
-        //putc('.', stdout); fflush(stdout); //Affiche un point (fflush permet de recharger la sortie), 
+        putc('.', stdout); fflush(stdout); //Affiche un point (fflush permet de recharger la sortie), 
                                          //nous verrons s'afficher un point à chaque parcours de la boucle
         if (tab[i] == 0){
             return 1;
@@ -28,7 +29,7 @@ int fouiller(unsigned char tab[], int depart, int fin){
     return 0;
 }
 
-void handleSIGTERM(){
+void handleSIGTERM(int sig){
     if(getppid() == parentPID){
         printf("PID %d s'est arrêté sous ordre du père \n", getpid());
         exit(0);
@@ -41,7 +42,6 @@ int main(int argc, char *argv[]){
     parentPID = getpid();
 
     //Initialisation du tableau
-    const int TABSIZE = 10000;
     unsigned char arr[TABSIZE]; //Entier de 0 à 255
     srandom(time(NULL));
 
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]){
 
     i = 0;
     bool found = false;
-    while (!found){
+    while (!found && i < N){
         if (rep_fils[i]){
             printf("Needle found ! \n");
             found = true;
