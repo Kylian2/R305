@@ -110,3 +110,25 @@ void echange2(float *a, float *b) {
 }
 ```
 On prend en paramètres les addresses des arguments et on manipule via les ces pointeurs les valeurs de pi et e. On stock dans `temp` la valeur de `a`(donc celle de `pi`), on donne à `a` la valeur de `b`(donc celle de `e`) et on donne à `b` la valeur de `temp`(la valeur d'origine de `a`). 
+
+## La primitive socketpair()
+
+```c
+#include <sys/socket.h>
+int socketpair(
+    int domaine, /* AF_UNIX ou AF_LOCAL */
+    int type, /* SOCK_STREAM ou SOCK_DGRAM */
+    int protocole, /* 0 */
+    int sockfd[2] /* les sockets créées sont placées ici */ 
+);
+```
+La primitive socketpair() renvoie 0 en cas de succès et -1 en cas d'échec. Les paramètres domaine, type, et protocole sont les mêmes que pour le primitif socket(). Les
+sockets créées sont nécessairement locales ; ainsi, domaine doit être AF_UNIX (ou AF_LOCAL). 
+Le paramètre sockfd est l’adresse d’un tableau de deux éléments de type int, où socketpair()
+
+placera les descripteurs des sockets créées. Après l’appel, sockfd[0] et sockfd[1] sont connectées,
+de sorte que toute donnée écrite dans sockfd[0] peut être lue depuis sockfd[1] et vice versa.
+
+En faisant un appel à fork() après la création des sockets, nous laisserons le processus-fils hériter
+les deux sockets. Après fork(), chaque processus fermera l’une des deux sockets, et se servira de
+l’autre pour communiquer avec son interlocuteur.
