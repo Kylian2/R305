@@ -41,8 +41,11 @@ int main(int argc, char *argv[]) {
 
   /* 3. On demande une connexion au serveur, tant qu'on y arrive pas. */
 
+  printf("Connexion en cours\n");
 
-  while(connect(sclient, (struct sockaddr *) &saddr, sizeof(saddr)) == -1){printf(".");};
+  while(connect(sclient, (struct sockaddr *) &saddr, sizeof(saddr)) == -1){printf(".");  sleep(1);};
+
+  printf("Vous pouvez envoyer un message\n");
 
   if(fork() == 0){
     while(1){
@@ -64,6 +67,7 @@ int main(int argc, char *argv[]) {
   }
 
   while(1){
+
     int nbLus = read(0, message, BUFFER_SIZE-strlen(argv[2])-1); 
     if (nbLus == 0){ //Connexion fermé
         break;
