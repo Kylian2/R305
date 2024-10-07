@@ -21,6 +21,7 @@
 int main(int argc, char *argv[]) {
 
   char message[BUFFER_SIZE] = {0};
+  char messageToSend[BUFFER_SIZE] = {0};
 
   /* 1. On crée la socket du client. */
 
@@ -40,7 +41,7 @@ int main(int argc, char *argv[]) {
 
   /* 3. On demande une connexion au serveur, tant qu'on y arrive pas. */
 
-  printf("Connexion...");
+
   while(connect(sclient, (struct sockaddr *) &saddr, sizeof(saddr)) == -1){printf(".");};
 
   if(fork() == 0){
@@ -54,7 +55,7 @@ int main(int argc, char *argv[]) {
       }
 
       //Ecriture sur la sortie
-      write(1,message, BUFFER_SIZE);
+      write(1,message, nbLus);
 
     }
     shutdown(sclient, SHUT_RDWR);
@@ -63,7 +64,7 @@ int main(int argc, char *argv[]) {
   }
 
   while(1){
-    int nbLus = read(0, message, BUFFER_SIZE-1); 
+    int nbLus = read(0, message, BUFFER_SIZE-strlen(argv[2])-1); 
     if (nbLus == 0){ //Connexion fermé
         break;
     }
@@ -71,9 +72,24 @@ int main(int argc, char *argv[]) {
         perror("Erreur lors du readB");
         return 1;
     }
-    //printf("%s > ", argv[2]);
-    snprintf(message, BUFFER_SIZE-1, "%s >", argv[2]);
-    write(sclient, &message, BUFFER_SIZE-1);
+
+    messageToSend[0] = '\0';
+    
+    // Copier le pseudo dans messageToSend
+    int lenPseudo = strlen(argv[2]);
+    for (int i = 0; i < lenPseudo && i < BUFFER_SIZE - 1; i++) {
+        messageToSend[i] = argv[2][i];
+    }
+    // Ajouter le '<' et l'espace après le pseudo
+    messageToSend[lenPseudo] = ' ';
+    messageToSend[lenPseudo + 1] = '>';
+    messageToSend[lenPseudo + 2] = ' ';
+    // Copier le message après
+    for (int i = 0; i < nbLus && lenPseudo + 3 < BUFFER_SIZE - 1; i++) {
+        messageToSend[lenPseudo + 3 + i] = message[i];
+    }
+    messageToSend[lenPseudo + 3 + nbLus] = '\0';
+    write(sclient, messageToSend, strlen(messageToSend));
   }
 
   shutdown(sclient, SHUT_RDWR);

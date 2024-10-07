@@ -22,6 +22,8 @@ int main(int argc, char *argv[]) {
 
   /* 1. On déroute les signaux */
 
+  signal(SIGCHL, )
+
   /* 2. On crée la socket d'écoute. */
 
   /* 3. On prépare l'adresse du serveur. */
