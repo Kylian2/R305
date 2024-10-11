@@ -61,12 +61,12 @@ int main(int argc, char *argv[]){
     while(1){
         caddrlen = sizeof(caddr);
         sservice = accept(secoute, (struct sockaddr *) &caddr, &caddrlen);
+        if(sservice == -1){
+            perror("Erreur lors de la création de la socket sservice");
+        }
         while(1){
-            if(sservice == -1){
-                perror("Erreur lors de la création de la socket sservice");
-            }
-
-            nbLus = read(sservice, message, BUFFER_SIZE);
+            
+            nbLus = read(sservice, message, BUFFER_SIZE-1);
             if(nbLus == -1){
                 perror("Erreur lors du read");
                 return 1;
@@ -74,13 +74,16 @@ int main(int argc, char *argv[]){
             if(nbLus == 0){
                 break;
             }
-            printf("%d \n", nbLus);
+
+            message[nbLus] = '\0';  
+
             shakeMessage(message, nbLus-1);
             write(1, message, nbLus);
             write(sservice, message, nbLus);
 
         }
-       
+        shutdown(sservice, SHUT_RDWR);
+        close(sservice);
     }
     shutdown(secoute, SHUT_RDWR);
     close(secoute);

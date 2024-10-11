@@ -14,6 +14,7 @@ int main(){
     double z = (double) random()/RAND_MAX;
     double x, y = 0;
     char c = '\0';
+
     //Creation de la socket double
     int sockfd[2];
     int spair = socketpair(AF_UNIX, SOCK_STREAM, 0, sockfd);
@@ -44,7 +45,6 @@ int main(){
                 perror("Erreur lors du readA");
                 return 1;
             }
-            printf("x = %g \n", x);
             //Demande y
             write(sockfd[1], &c, sizeof(char));
             nbLus = read(sockfd[1], &y, sizeof(double));
@@ -55,12 +55,10 @@ int main(){
                 perror("Erreur lors du readB");
                 return 1;
             }
-            printf("y = %g \n", y);
-            printf("puissance = %g \n", pow(x, 2) + pow(y,2));
             if(pow(x, 2) + pow(y,2) <= 1){
                 m++;
             }
-            if(n % 100000 == 0){
+            if(n % 10000 == 0){
                 double pi = (4.0*m)/n;
                 printf("Valeur de pi : %g \n",pi);
             }

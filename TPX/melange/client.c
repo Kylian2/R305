@@ -33,7 +33,7 @@ int main(int argc, char *argv[]){
 
     while(1){
         write(1, "Message > ", strlen("Message > "));
-        nbLus = read(0, message, BUFFER_SIZE);
+        nbLus = read(0, message, BUFFER_SIZE-1);
 
         if(nbLus == -1){
             perror("Erreur de read sur l'entrée std");
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]){
 
         write(sclient, message, nbLus);
 
-        nbLus = read(sclient, message, BUFFER_SIZE);
+        nbLus = read(sclient, message, BUFFER_SIZE-1);
         if(nbLus == -1){
             perror("Erreur de read sur l'entrée std");
         }
