@@ -46,7 +46,7 @@ int main(int argc, char *argv[]){
     unsigned int caddrlen;
 
     saddr.sin_family = AF_INET;
-    saddr.sin_port = PORT;
+    saddr.sin_port = htons(PORT);
     saddr.sin_addr.s_addr = inet_addr(argv[1]);
 
     if(bind(secoute, (struct sockaddr *) &saddr, sizeof(saddr))){
