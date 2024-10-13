@@ -1,4 +1,5 @@
 */output/*
+.DS_Store
 .vscode
 test.c
 a.out
