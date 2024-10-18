@@ -10,7 +10,7 @@ int argi[NB_LIGNES];
 
 int A[NB_LIGNES][NB_COLONNES];  
 int X[NB_LIGNES];
-int Y[NB_LIGNES] = {};
+int Y[NB_LIGNES] = {0};
 
 void display(int matrice[NB_LIGNES][NB_COLONNES]){
     for (int i = 0; i < NB_LIGNES; i++){
